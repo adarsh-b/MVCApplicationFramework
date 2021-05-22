@@ -30,7 +30,7 @@
             {
                 <tr style="align-content:center">
                     <td class="col-md-1">
-                       @Html.ActionLink(Convert.ToString(@item.ID), "Index", "UserManager")
+                        @Html.ActionLink(Convert.ToString(@item.ID), "Edit", "UserManager", new { Id = @item.ID }, null)
                     </td>
                     <td class="col-md-1">
                         @item.LoginName 

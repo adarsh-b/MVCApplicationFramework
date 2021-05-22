@@ -25,6 +25,6 @@ namespace MVCApplicationFramework.Entities
         public Nullable<System.DateTime> UpdatedDate { get; set; }
         public Nullable<int> UpdatedBy { get; set; }
 
-        public ICollection<Role> Roles { get; set; }
+        public IList<Role> Roles { get; set; }
     }
 }

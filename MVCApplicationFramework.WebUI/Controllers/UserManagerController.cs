@@ -18,7 +18,6 @@ namespace MVCApplicationFramework.WebUI.Controllers
 
         public ActionResult Index()
         {
-            List<User> users = new List<Entities.User>();
             using (var client = new HttpClient())
             {
                 var response = client.GetAsync(ConfigurationManager.AppSettings["WebAPIBaseURL"] + "UserManager/GetUserList").Result;
@@ -28,8 +27,35 @@ namespace MVCApplicationFramework.WebUI.Controllers
                     var apiResponseObject = JsonConvert.DeserializeObject<APIResponse>(response.Content.ReadAsStringAsync().Result);
                     if (apiResponseObject.MessageType == EnumMessageType.OPERATION_SUCCESS)
                     {
-                        users = JsonConvert.DeserializeObject<List<User>>(apiResponseObject.Data[0].ToString());
+                        var users = JsonConvert.DeserializeObject<List<User>>(apiResponseObject.Data[0].ToString());
                         return View(users);
+                    }
+                    else
+                    {
+                        throw new Exception(apiResponseObject.Exception);
+                    }
+                }
+                else
+                {
+                    log.Error("Error StatusCode:" + response.StatusCode.ToString() + " - " + response.ReasonPhrase);
+                    throw new Exception(response.StatusCode.ToString());
+                }
+            }
+        }
+
+        public ActionResult Edit(int Id)
+        {
+            using (var client = new HttpClient())
+            {
+                var response = client.GetAsync(ConfigurationManager.AppSettings["WebAPIBaseURL"] + "UserManager/GetUserByID?userId" + Convert.ToString(Id)).Result;
+
+                if (response.IsSuccessStatusCode && response.StatusCode == HttpStatusCode.OK)
+                {
+                    var apiResponseObject = JsonConvert.DeserializeObject<APIResponse>(response.Content.ReadAsStringAsync().Result);
+                    if (apiResponseObject.MessageType == EnumMessageType.OPERATION_SUCCESS)
+                    {
+                        var user = JsonConvert.DeserializeObject<User>(apiResponseObject.Data[0].ToString());
+                        return View("Edit", user);
                     }
                     else
                     {
