@@ -47,6 +47,40 @@ namespace MVCApplicationFramework.Business
             }
         }
 
+        public ICollection<Entities.User> GetUserList()
+        {
+            using (MVCApplicationFrameworkDatabase _database = new MVCApplicationFrameworkDatabase())
+            {
+                var userList = _database.Users.Select(x=>
+                 new Entities.User
+                 {
+                     ID = x.ID,
+                     LoginName = x.LoginName,
+                     ContactNumber = x.ContactNumber,
+                     CreatedBy = x.CreatedBy,
+                     CreatedDate = x.CreatedDate,
+                     FirstName = x.FirstName,
+                     LastName = x.LastName,
+                     MiddleName = x.MiddleName,
+                     Password = x.Password,
+                     UpdatedBy = x.UpdatedBy,
+                     UpdatedDate = x.UpdatedDate,
+                     Roles = x.UserRoles.Select(ur => new Entities.Role
+                     {
+                         ID = ur.Role.ID,
+                         Name = ur.Role.Name,
+                         CreatedBy = ur.CreatedBy,
+                         CreatedDate = ur.CreatedDate,
+                         UpdatedBy = ur.UpdatedBy,
+                         UpdatedDate = ur.UpdatedDate
+                     }).ToList()
+                 }
+                ).ToList();
+
+                return userList;
+            }
+        }
+
         public int Save(Entities.User user)
         {
             bool newRecord = true;
@@ -54,6 +88,15 @@ namespace MVCApplicationFramework.Business
             using (MVCApplicationFrameworkDatabase _database = new MVCApplicationFrameworkDatabase())
             {
                 var objUser = _database.Users.Where(x => x.ID == user.ID).FirstOrDefault();
+                if (objUser == null)
+                {
+                    objUser = new DataAccess.User();
+                }
+                else
+                {
+                    objUser.UserRoles.Clear();
+                    newRecord = true;
+                }
 
                 objUser.ID = user.ID;
                 objUser.LoginName = user.LoginName;
@@ -67,23 +110,20 @@ namespace MVCApplicationFramework.Business
                 objUser.UpdatedBy = user.UpdatedBy;
                 objUser.UpdatedDate = user.UpdatedDate;
 
-                if (objUser == null)
+                foreach(Entities.Role role in user.Roles)
                 {
-                    objUser = new DataAccess.User();
-                    newRecord = false;
-                }
-                else
-                {
-                    objUser.UserRoles.Clear();
-                }
+                    var objUserRole = new DataAccess.UserRole
+                    {
+                        RoleID = role.ID,
+                        UserID = objUser.ID,
+                        CreatedBy = user.CreatedBy,
+                        CreatedDate = user.CreatedDate
+                    };
 
-                objUser.UserRoles = user.Roles.Select(r => new DataAccess.UserRole
-                {
-                    UserID = objUser.ID,
-                    RoleID = r.ID,
-                    CreatedBy = user.CreatedBy
-                }).ToList();
-
+                    _database.Entry(objUserRole).State = EntityState.Added;
+                }
+               
+                
                 if (newRecord)
                 {
                     _database.Entry(objUser).State = EntityState.Added;
