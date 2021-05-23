@@ -103,3 +103,26 @@ VALUES
 ((SELECT ID FROM [dbo].[User] WHERE LoginName = 'devikasatare26@gmail.com'), @TraneeRoleID, @CreatedByUserID),
 ((SELECT ID FROM [dbo].[User] WHERE LoginName = 'ramani.k@codearray.tech'), @ReportViewerRoleID, @CreatedByUserID)
 
+
+
+-----
+Select * from [User]
+Select * from [Role]
+Select * from [UserRole]
+
+
+SELECT	u.ID,
+		LoginName,
+		[Password],
+		FirstName,
+		MiddleName,
+		LastName,
+		ContactNumber,
+		r.[Name],
+		u.CreatedDate,
+		u.CreatedBy,
+		u.UpdatedDate,
+		u.UpdatedBy
+FROM	[User] u
+JOIN	[UserRole] ur ON ur.UserID = u.Id
+JOIN	[Role] r ON r.ID = ur.RoleID
